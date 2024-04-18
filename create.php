@@ -4,7 +4,7 @@ require_once "config.php";
  
 // Define variables and initialize with empty values
 $name = $address = $salary = "";
-$name_err = $address_err = $salary_err = "";
+$product_id_err = $product_thumbnail_link_err = $product_name_err = $product_product_description_err = $product_retail_price_err = $product_product_date_added_err = $product_product_updated_date_err = "";
  
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
