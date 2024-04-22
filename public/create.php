@@ -1,12 +1,8 @@
 <?php
-// Include config file
-require_once "config.php";
- 
-// Define variables and initialize with empty values
+require_once "../db/config.php";
 $id = $link = $name = $description = $price = $added = $updated = "";
 $id_err = $link_err = $name_err = $description_err = $price_err = $added_err = $updated_err = "";
 
-// Processing form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["id"])) {
         
@@ -94,84 +90,103 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $updated_err = "Updated date is required";
     }
 
-    
-    // Check input errors before inserting in database
-    if(empty($name_err) && empty($address_err) && empty($salary_err)){
-        // Prepare an insert statement
-        $sql = "INSERT INTO employees (name, address, salary) VALUES (:name, :address, :salary)";
- 
-        if($stmt = $pdo->prepare($sql)){
-            // Bind variables to the prepared statement as parameters
-            $stmt->bindParam(":name", $param_name);
-            $stmt->bindParam(":address", $param_address);
-            $stmt->bindParam(":salary", $param_salary);
-            
-            // Set parameters
-            $param_name = $name;
-            $param_address = $address;
-            $param_salary = $salary;
-            
-            // Attempt to execute the prepared statement
-            if($stmt->execute()){
-                // Records created successfully. Redirect to landing page
-                header("location: index.php");
+    if (empty($id_err) && empty($link_err) && empty($name_err) && empty($description_err) && empty($price_err) && empty($added_err) && empty($updated_err)) {
+        $sql = "INSERT INTO products (product_id, product_thumbnail_link, product_name, product_description, product_retail_price, product_date_added, product_updated_date) VALUES (:id, :link, :name, :description, :price, :added, :updated)";
+
+        echo "SQL Query: $sql<br>";
+
+        if ($stmt = $pdo->prepare($sql)) {
+            $stmt->bindParam(":id", $id);
+            $stmt->bindParam(":link", $link);
+            $stmt->bindParam(":name", $name);
+            $stmt->bindParam(":description", $description);
+            $stmt->bindParam(":price", $price);
+            $stmt->bindParam(":added", $added);
+            $stmt->bindParam(":updated", $updated);
+
+            if ($stmt->execute()) {
+                header("location: ../index.php");
                 exit();
-            } else{
+            } else {
                 echo "Oops! Something went wrong. Please try again later.";
+                print_r($stmt->errorInfo());
             }
+        } else {
+            echo "Failed to prepare the SQL statement.";
         }
-         
-        // Close statement
+
         unset($stmt);
     }
-    
-    // Close connection
+
     unset($pdo);
 }
 ?>
- 
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Create Record</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        .wrapper{
+        .wrapper {
             width: 600px;
             margin: 0 auto;
         }
     </style>
 </head>
+
 <body>
     <div class="wrapper">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
                     <h2 class="mt-5">Create Record</h2>
-                    <p>Please fill this form and submit to add employee record to the database.</p>
+                    <p>Please fill this form and submit to add a product record to the database.</p>
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                        <div class="form-group">
+                            <label>ID</label>
+                            <input type="text" name="id" class="form-control <?php echo (!empty($id_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $id; ?>">
+                            <span class="invalid-feedback"><?php echo $id_err; ?></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Link</label>
+                            <input type="text" name="link" class="form-control <?php echo (!empty($link_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $link; ?>">
+                            <span class="invalid-feedback"><?php echo $link_err; ?></span>
+                        </div>
                         <div class="form-group">
                             <label>Name</label>
                             <input type="text" name="name" class="form-control <?php echo (!empty($name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $name; ?>">
-                            <span class="invalid-feedback"><?php echo $name_err;?></span>
+                            <span class="invalid-feedback"><?php echo $name_err; ?></span>
                         </div>
                         <div class="form-group">
-                            <label>Address</label>
-                            <textarea name="address" class="form-control <?php echo (!empty($address_err)) ? 'is-invalid' : ''; ?>"><?php echo $address; ?></textarea>
-                            <span class="invalid-feedback"><?php echo $address_err;?></span>
+                            <label>Description</label>
+                            <textarea name="description" class="form-control <?php echo (!empty($description_err)) ? 'is-invalid' : ''; ?>"><?php echo $description; ?></textarea>
+                            <span class="invalid-feedback"><?php echo $description_err; ?></span>
                         </div>
                         <div class="form-group">
-                            <label>Salary</label>
-                            <input type="text" name="salary" class="form-control <?php echo (!empty($salary_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $salary; ?>">
-                            <span class="invalid-feedback"><?php echo $salary_err;?></span>
+                            <label>Price</label>
+                            <input type="text" name="price" class="form-control <?php echo (!empty($price_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $price; ?>">
+                            <span class="invalid-feedback"><?php echo $price_err; ?></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Date Added</label>
+                            <input type="date" name="added" class="form-control <?php echo (!empty($added_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $added; ?>">
+                            <span class="invalid-feedback"><?php echo $added_err; ?></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Updated Date</label>
+                            <input type="date" name="updated" class="form-control <?php echo (!empty($updated_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $updated; ?>">
+                            <span class="invalid-feedback"><?php echo $updated_err; ?></span>
                         </div>
                         <input type="submit" class="btn btn-primary" value="Submit">
-                        <a href="index.php" class="btn btn-secondary ml-2">Cancel</a>
+                        <a href="../index.php" class="btn btn-secondary ml-2">Cancel</a>
                     </form>
                 </div>
-            </div>        
+            </div>
         </div>
     </div>
 </body>
+
 </html>
